@@ -1,0 +1,35 @@
+//1.声明这是一个native函数，由本地代码实现
+public static native String sayHello(String name);
+
+//2.加载实现了native函数的动态库，只需要写动态库的名字
+    static {
+        System.loadLibrary("myjni");
+    }
+//3.build.gradle中和gradle.properties中的配置
+    defaultConfig {
+        ndk {
+            moduleName "myjni"//动态库的名称
+            ldLibs "log"
+            abiFilters "armeabi", "armeabi-v7a", "x86"
+        }
+    }
+android.useDeprecatedNdk=true
+
+//4.调用本地函数
+String text = sayHello("yangxin");
+
+//5.build>make project 生成class文件  在app\build\intermediates\classes\debug 中
+
+//6.生成jni头文件 注意文件路径位置
+ E:\asproject\4.28\jindemo\app\src\main>
+ javah -d jni -classpath E:\AndroidStudioTools\AppData\Local\Android\sdk\platforms\android-19\android.jar;
+ ..\..\build\intermediates\classes\debug com.jindemo.jindemo.HelloWorld
+
+//7.获取头文件 创建编辑 c文件代码
+#include <jni.h>
+JNIEXPORT jstring JNICALL Java_com_jindemo_jindemo_HelloWorld_sayHello(JNIEnv *env, jobject obj){
+    return (*env)->NewStringUTF(env, "hellow word jni android studio");
+}
+
+//8.build>rebuild project 生成os文件  在app\build\intermediates\ndk\lib 中
+
